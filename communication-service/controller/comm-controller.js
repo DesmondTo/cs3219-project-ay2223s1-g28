@@ -100,27 +100,23 @@ export function handleSessionEnd(io, socket) {
     socket.on(event, () => {
       socket.rooms.forEach((room) => {
         if (room !== socket.id) {
-          setTimeout(function () {
-            if (
-              event === sessionEndEvents[0] ||
-              // If after 10 seconds, the room is still less than 2 people,
-              // we can assume that the user had closed the tab.
-              // Otherwise, the user just refreshed the page
-              !io.sockets.adapter.rooms.get(room) ||
-              io.sockets.adapter.rooms.get(room).size < 2
-            ) {
-              // Emit to other sockets in the same room this socket had joined
-              socket
-                .to(room)
-                .emit(
-                  'session-end',
-                  'Your peer has left the session.',
-                  'warning'
-                );
-              io.socketsLeave(room);
-              _deleteChats(room);
-            }
-          }, 10000);
+          if (
+            event === sessionEndEvents[0] ||
+            // If the room is less than 2 people,
+            // we can assume that the user had closed the tab
+            !io.sockets.adapter.rooms.get(room) ||
+            io.sockets.adapter.rooms.get(room).size < 2
+          ) {
+            // Emit to other sockets in the same room this socket had joined
+            socket
+              .to(room)
+              .emit(
+                'session-end',
+                'Your peer has left the session.',
+                'warning'
+              );
+            io.socketsLeave(room);
+          }
         } else {
           // Emit back to the socket itself
           socket.emit('session-end', 'You have left the session.', 'info');

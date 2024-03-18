@@ -27,12 +27,13 @@ function CollabEditor({ socket, roomId }) {
         });
 
         socket.on('update-code', (code) => {
-            editor.setValue(code);
+            if (code != null) {
+                editor.setValue(code);
+            }
         });
 
         return () => {
             socket.off('connect');
-            socket.off('update-code');
         };
     }, [socket, roomId]);
 
